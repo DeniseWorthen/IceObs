@@ -61,7 +61,7 @@ module cdf
 
                  character(len=*), intent( in) :: cdffile
                  character(len=*), intent( in) :: varname
-       real, dimension(iiobs,jjobs), intent(out) :: aout
+     real, dimension(iiobs,jjobs), intent(out) :: aout
 
   integer(kind=1), dimension(iiobs,jjobs,1) :: i3d
      real(kind=4), dimension(iiobs,jjobs)   :: a2d

@@ -25,7 +25,6 @@ subroutine write_obs(cdffile,obsname,ain,lstep)
    history = trim(ainame)
 
    rc = nf90_create(trim(cdffile), nf90_clobber, ncid)
-   print *,'setting up ',trim(cdffile)
 
    rc = nf90_def_dim(ncid,    'Xt',           iiobs,   xtndim)
    rc = nf90_def_dim(ncid,    'Yt',           jjobs,   ytndim)
@@ -49,9 +48,6 @@ subroutine write_obs(cdffile,obsname,ain,lstep)
     rc = nf90_close(ncid)
   endif
 
-   rc = nf90_put_att(ncid, nf90_global, 'history', trim(history))
-   rc = nf90_enddef(ncid)
-
   !-----------------------------------------------------------------------------
 
   rc = nf90_open(trim(cdffile), nf90_write, ncid)
@@ -67,7 +63,7 @@ subroutine write_obs(cdffile,obsname,ain,lstep)
      edge3(3) = 1
      edge3(2) = jjobs
      edge3(1) = iiobs
-   rc = nf90_inq_varid(ncid,       trim(obsname),  datid)
+   rc = nf90_inq_varid(ncid,       trim(obsname), datid)
    rc = nf90_put_var(ncid, datid,   ain, corner3, edge3)
 
    rc = nf90_close(ncid)

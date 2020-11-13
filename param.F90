@@ -7,13 +7,14 @@ module param
   integer, parameter, dimension(nhemi) :: iobs = (/304, 316/)
   integer, parameter, dimension(nhemi) :: jobs = (/448, 332/)
 
-  integer, parameter ::    yrbeg = 2011, yrend = 2018
+  integer, parameter ::    yrbeg = 2013, yrend = 2015
   !integer, parameter ::    yrbeg = 2011, yrend = 2012
   integer, parameter ::   nyears = (yrend-yrbeg)+1
   integer, parameter ::     nmon = 12
   integer, parameter ::    ndays = 35
   !integer, parameter ::    ndays = 5
-  integer, parameter :: maxsteps = nyears*366
+  integer, parameter ::  maxdays = 366
+  integer, parameter :: maxsteps = nyears*maxdays
   integer, parameter ::  maxexps = 2*nmon*nyears
 
   integer, parameter, dimension(nhemi) :: nregs = (/15, 6/)

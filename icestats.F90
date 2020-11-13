@@ -18,7 +18,7 @@ program icestats
 
   character(len=240) :: cdffile, outcdf
 
-  integer :: i,j,n,nh,nr,nrr,nt
+  integer :: i,j,n,nh,nr,nrr,nt,nm,nd
   integer :: year, mon, day, lll
   integer :: nr1
 
@@ -28,8 +28,10 @@ program icestats
 
      real(kind=4) :: rnum, area, extent, mvar
 
-  real, allocatable, dimension(:,:) :: ai, hi, aifill
-
+  real, allocatable, dimension(:,:)     :: ai, hi, aifill
+  real, allocatable, dimension(:,:,:,:) :: aisum, aicnt
+  real, allocatable, dimension(:,:,:,:) :: hisum, hicnt
+  
   real, dimension(iobs(1),jobs(1),nregs(1)) :: csm1
   real, dimension(iobs(2),jobs(2),nregs(2)) :: csm2
 
@@ -77,6 +79,10 @@ program icestats
    allocate(    ai(1:iiobs,1:jjobs))
    allocate(aifill(1:iiobs,1:jjobs))
 
+   allocate( hisum(1:iiobs,1:jjobs,1:nmon,1:31))
+   allocate( hicnt(1:iiobs,1:jjobs,1:nmon,1:31))
+   allocate( aisum(1:iiobs,1:jjobs,1:nmon,1:31))
+   allocate( aicnt(1:iiobs,1:jjobs,1:nmon,1:31))
   !---------------------------------------------------------------------
 
    ! get the model grid variables
@@ -128,8 +134,8 @@ program icestats
   !---------------------------------------------------------------------
 
    lll = 0
-  do nt = 1,nsteps
-  !do nt = 1,30
+  !do nt = 1,nsteps
+  do nt = 1,13
     nrr = nr1
     lll = lll + 1
    year = ymd(1,nt)
@@ -140,8 +146,7 @@ program icestats
    write( cmon, i2fmt)mon
    write( cday, i2fmt)day
    cdate = trim(cyear)//trim(cmon)//trim(cday)
-   if(mod(nt,30) .eq. 0)print *,'working on ',trim(cdate)
-   !print *,trim(cdate),lll,nh
+   !if(mod(nt,30) .eq. 0)print *,'working on ',trim(cdate)
 
    ! hiobs
    hi = mval
@@ -156,6 +161,19 @@ program icestats
    ! create ice field filled in at pole hole
                                                aifill = ai
    where((ai .eq. mval) .and. (phole .gt. 0.0))aifill = 1.0
+
+    do j = 1,jjobs
+     do i = 1,iiobs
+       if(ai(i,j) .ne. mval)then
+        aisum(i,j,mon,day) = aisum(i,j,mon,day) + ai(i,j)
+        aicnt(i,j,mon,day) = aicnt(i,j,mon,day) + 1.0
+       endif
+       if(hi(i,j) .ne. mval)then
+        hisum(i,j,mon,day) = hisum(i,j,mon,day) + hi(i,j)
+        hicnt(i,j,mon,day) = hicnt(i,j,mon,day) + 1.0
+       endif
+     enddo
+    enddo
 
     do nr = 1,nnreg
       nrr = nrr+1
@@ -181,12 +199,34 @@ program icestats
     rc = nf90_close(ncid)
 
    !testing
-   if(nh.eq. 1)call write_obs(trim(obssrc)//'IceData/hi.nc','hi',hi,lll)
-   if(nh.eq. 1)call write_obs(trim(obssrc)//'IceData/ai.nc','ai',ai,lll)
+   !if(nh.eq. 1)call write_obs(trim(obssrc)//'IceData/hi.nc','hi',hi,lll)
+   !if(nh.eq. 1)call write_obs(trim(obssrc)//'IceData/ai.nc','ai',ai,lll)
    enddo !nt
 
+  !---------------------------------------------------------------------
+
+   where(aicnt .ne. 0.0)aisum = aisum/aicnt
+   where(hicnt .ne. 0.0)hisum = hisum/hicnt
+
+     lll = 0
+    year = 2012
+   do nm = 1,nmon
+    do nd = 1,mnendl(nm)
+      lll = lll + 1
+
+     ai(:,:) = aisum(:,:,nm,nd)
+     hi(:,:) = hisum(:,:,nm,nd)
+
+     call set_taxis(year,nm,nd)
+     call write_obs(trim(obssrc)//'IceData/ice.'//trim(ainame)//'.dm.'//trim(psrc(nh))//'.nc','ai',ai,lll)
+     call write_obs(trim(obssrc)//'IceData/ice.hi.dm.'//trim(psrc(nh))//'.nc','hi',hi,lll)
+    enddo
+   enddo
+
    deallocate(lsmask,plat,plon,parea,rmask,csm,phole)
+   deallocate(aisum,aicnt,hisum,hicnt)
    deallocate(ai,hi,aifill)
+
   enddo !nh
 
   !---------------------------------------------------------------------
