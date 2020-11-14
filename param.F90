@@ -7,7 +7,7 @@ module param
   integer, parameter, dimension(nhemi) :: iobs = (/304, 316/)
   integer, parameter, dimension(nhemi) :: jobs = (/448, 332/)
 
-  integer, parameter ::    yrbeg = 2013, yrend = 2015
+  integer, parameter ::    yrbeg = 2011, yrend = 2018
   !integer, parameter ::    yrbeg = 2011, yrend = 2012
   integer, parameter ::   nyears = (yrend-yrbeg)+1
   integer, parameter ::     nmon = 12

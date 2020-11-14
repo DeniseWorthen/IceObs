@@ -134,8 +134,8 @@ program icestats
   !---------------------------------------------------------------------
 
    lll = 0
-  !do nt = 1,nsteps
-  do nt = 1,13
+  do nt = 1,nsteps
+  !do nt = 1,13
     nrr = nr1
     lll = lll + 1
    year = ymd(1,nt)
@@ -162,6 +162,10 @@ program icestats
                                                aifill = ai
    where((ai .eq. mval) .and. (phole .gt. 0.0))aifill = 1.0
 
+   if(lll .eq. lbeg)print *,year,mon,day
+   if(lll .eq. lend)print *,year,mon,day
+
+   if((lll .ge. lbeg) .and. (lll .le. lend))then
     do j = 1,jjobs
      do i = 1,iiobs
        if(ai(i,j) .ne. mval)then
@@ -174,6 +178,7 @@ program icestats
        endif
      enddo
     enddo
+   end if
 
     do nr = 1,nnreg
       nrr = nrr+1
